@@ -16,11 +16,11 @@ void test()
 
     string s5(10, 'a');
     
-    cout<< s1 << endl;
-    cout<< s2 << endl;
-    cout<< s3 << endl;
-    cout<< s4 << endl;
-    cout<< s5 << endl;
+    cout<< "s1 " << s1 << endl;
+    cout<< "s2 " << s2 << endl;
+    cout<< "s3 " << s3 << endl;
+    cout<< "s4 " << s4 << endl;
+    cout<< "s5 " << s5 << endl;
 
 //  npos
 //  static const size_t npos  = -1;
@@ -220,20 +220,14 @@ void test9()
 
 int main()
 {
-    
 
-
-
-
-
-
-
+//1.
 // c++头文件不要带.h
 // 四个默认成员函数
     
 // 构造函数
 // 析构函数
-    //test();
+   test();
 
 
 // 遍历
@@ -277,7 +271,9 @@ int main()
     // s.erase(2,3);
     // cout<< s <<endl;
     
-    test9();
+    /*
+     *test9();
+     */
 
 
 
