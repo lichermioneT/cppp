@@ -10,15 +10,16 @@ void test()
     s.push_back('a');
     s.append("xxxx");
     
-    for(int i = 0; i < s.size(); i++)
+//1.[]
+    for(size_t i = 0; i < s.size(); i++)
     {
         cout<< s[i] << " ";
     }
 
     cout<< endl;
 
-
-    auto it = s.begin();
+//2.迭代器
+    string::iterator it = s.begin();
     while(it != s.end())
     {
         cout<< *it << " ";
@@ -27,6 +28,7 @@ void test()
     
     cout<<endl;
 
+//3.范围for
     for(auto e : s)
     {
         cout<< e  << " ";
@@ -38,9 +40,6 @@ void test()
 
 void test2()
 {
-
-
-
 // c_str
 // 返回一个指针
 
@@ -73,7 +72,7 @@ void test2()
     
     // ascii码表
     unsigned char ch = 0;
-    do {
+    do{
         cout << ch << endl;
         ch++;
     } while (ch != 0);  // ch 回到 0 就结束
@@ -99,15 +98,14 @@ void test3()
     string s("string.cpp");
     string s1("string.cppx");
     string s2("string.txt");
+// find函数，找一个字符
     size_t pos1 = s.find('.');
     size_t pos2 = s.find('.');
     size_t pos3 = s.find('.');
-    
+// rfind函数 
     cout<< s.substr(pos1) <<endl;
     cout<< s1.substr(pos2) <<endl;
     cout<< s2.substr(pos3) <<endl;
-
-
 
     string s3("linux.cpp.tar");
     size_t pos4 = s3.rfind('.');
@@ -122,16 +120,16 @@ void split_url(const string& url)
     
     if(pos1 != string::npos)
     {
-        cout<< url.substr(0, pos1) <<endl;
+        cout<< url.substr(0, pos1) <<endl; // 分理出来协议的[);
     }
 
     size_t pos2 = url.find('/', pos1 + 3);
     if(pos2 != string::npos)
     {
-        cout<< url.substr(pos1 + 3, pos2-pos1-3) <<endl;
+        cout<< url.substr(pos1 + 3, pos2-pos1-3) <<endl; // 域名
     }
     
-    cout<< url.substr(pos2 + 2) <<endl;
+    cout<< url.substr(pos2 + 1) <<endl;
 }
 
 
@@ -177,44 +175,99 @@ void test5()
     // cout<< (s1 < s2) <<endl;
     // cout<< (s1 < "asdfas") <<endl;
     // cout<< ("TTTT" < s2) <<endl;
-
-
-
-
-
 }
-
-
-
-
-
-
-
-
 //getline()
 
 void test6()
 {
-
     string s;
     // cin遇到空格直接放弃读取
     // cin>>s;
 
-
     // getline只是遇到换行才结束的
     getline(cin, s);
     size_t pos =  s.rfind(' ');
-    cout<< s.size() - (pos + 1) <<endl;
-
+    cout<< s.size() - (pos + 1) <<endl; // +1是因为找到了空格字符需要跳过去的。
 }
 
+class Solution 
+{
+public:
+    bool isPalindrome(string s) 
+    {
+        for (auto& e : s)
+        {
+            e = toupper(static_cast<unsigned char>(e));
+        }
+        
+        int left = 0;
+        int n = s.size();  // 这里最好right = n -1;
+        int right = n-1;
 
+        while(left < right)
+        {
+            while(left < right && !isalnum(s[left]))  // 不是数字和字符 ++，是的话就不++;
+            {
+                left++;
+            }
+            while (left < right && !isalnum(s[right]))
+            {
+                right--;
+            }
+            
+            if(s[left] != s[right])
+            {
+                return false;
+            }
 
+            // 判断完毕，进行下一个
+            left++;
+            right--;
+        }
 
+        return true;
+    }
+};
+class Solution2 {
+public:
+    string addStrings(string num1, string num2) 
+    {
+        int end1 = num1.size()-1;
+        int end2 = num2.size()-1;
+        int next = 0;
+        string retstr;
+        while(end1 >= 0 || end2 >= 0)
+        {
+            int val1 = 0;
+            int val2 = 0;
+            if(end1 >= 0)
+                val1 = num1[end1] - '0';
+            if(end2 >= 0)
+                val2 = num2[end2] - '0';
+            
+            int ret = val1 + val2 + next;
+            if(ret > 9)
+            {
+                ret -= 10;
+                next = 1;
+            }
+            else 
+            {
+                next = 0;
+            }
+            retstr.insert(retstr.begin(), ret + '0'); // 直接头插，然后直接一个逆置算法
+            --end1;
+            --end2;
+        }
 
+        if(next == 1)
+        {
+            retstr.insert(retstr.begin(), '1');
+        }
 
-
-
+        return retstr;
+    }
+};
 
 int main()
 {
@@ -223,8 +276,10 @@ int main()
 // s.substr();
     // test();
     // test2();
-    // test3();
-    // test4();
+     /*
+      *test3();
+      */
+     test4();
     // test5();
     // test6();
         

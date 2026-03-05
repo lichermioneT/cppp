@@ -9,26 +9,45 @@ public:
     string()
         : _str(new char[1])
     {
-        _str[0] = '\0';
+        _str[0] = '\0'; // 注意\0的存在
     }
 
     string(const char* str)
     {   
-        // 开辟一块新空间
+        // 1.
+        // 开辟一块新空间,然后把数据拷贝过去的，不然常量字符串，不允许修改的。
         // strlen会计算到\0,不计算\0
-        _str = new char[strlen(str) + 1];
-
-        // 数据拷贝过去
-        strcpy(_str, str); // str(目标地址，源地址) 这里会拷贝\0的
-    }
+        _str = new char[strlen(str) + 1]; // 这里就是在堆里面开辟一块空间的。
         
+        // 2.
+        // 数据拷贝过去
+        strcpy(_str, str); // str(目标地址，源地址) 这里会拷贝\0的,细节拷贝\0的。
+    }
+    
+    /*
+     *上面的两个合并成一个全缺省的构造函数
+     *string(const char* str = "")
+     *  :_str(new char[strlen(str) + 1])
+     *{
+     *  strcpy(_str, str);
+     *}
+     */
+      
+    ~string()
+    {
+      delete[] _str;
+      _str = nullptr;
+    }
+
+// 浅拷贝(值拷贝)，只需要把对象的成员属性拷贝给另一个就行的。
+// 这里可能析构两次了，这里string的成员属性有指针存在的。
     string(const string& that)
     {
         // 深拷贝
         if (that._str) 
         {
-            _str = new char[strlen(that._str) + 1];
-            strcpy(_str, that._str);
+            _str = new char[strlen(that._str) + 1];// 开空间
+            strcpy(_str, that._str);               // 拷贝过去了
         }   
         else 
         {
@@ -37,7 +56,7 @@ public:
          }
     }
 
-
+// 赋值也是一样的，不给的话也是值拷贝的了。
     string& operator=(const string& that)
     {
         // 1. 自赋值检查
@@ -58,18 +77,7 @@ public:
             _str = new char[1];
             _str[0] = '\0';
         }
-
         return *this;
-    }
-
-    char& operator[](size_t i)
-    {
-        return _str[i];
-    }
-    
-    size_t size()
-    {
-        return strlen(_str);
     }
 
     string& operator+=(const char* str)
@@ -97,6 +105,22 @@ public:
 
         return *this;
     }
+
+    char& operator[](size_t i)
+    {
+        return _str[i];
+    }
+    
+    char* c_str() const
+    {
+      return _str;
+    }
+
+    size_t size() const
+    {
+        return strlen(_str);
+    }
+
 
     void print() const
     {
@@ -239,21 +263,44 @@ public:
     {
         return _str + _size;
     }
+
     string(const char* str = "")
     {
-        _str = new char[strlen(str) + 1];
-        strcpy(_str, str);
-        _size = _capacity = strlen(str);
+      _size = strlen(str); //  _size依旧是有效的数字
+      _capacity = _size;   //  依旧是相等的
+      _str = new char[_capacity + 1]; // 多一个空间存放\0, 不算是有效的字符串，为了兼容c语言的。
+      strcpy(_str, str);             //  strcpy依旧是会拷贝\0的。
     }
     
     ~string()
     {
         delete[] _str;
+        _str = nullptr;
         _size = _capacity = 0;
     }
     
     // 拷贝构造
+    string(const string& that)
+    {
+        _str = new  char[strlen(that._str) + 1];
+        strcpy(_str, that._str);
+        _size = that._size;
+        _capacity = that._capacity;
+    }
     // 赋值构造
+    string& operator=(const string& that)
+    {
+      if(this == &that)
+        return *this;
+      
+      delete[] _str;
+
+      _str = new char[strlen(that._str) + 1];
+      strcpy(_str, that._str);
+      _size = that._size;
+      _capacity = that._capacity;
+      return *this;
+    } 
 
     size_t size() const
     {
@@ -283,17 +330,20 @@ public:
         return _str;
     }
 
-    // ostream& operator<<(ostream& out, const string& s)
-    // {
-    //     for(size_t i = 0; i < s.size(); i++)
-    //     {
-    //         cout<< s[i];
-    //     }
-
-    //     return out;
-    // }
+/*
+ *     ostream& operator<<(ostream& out, const string& s)
+ *     {
+ *         for(size_t i = 0; i < s.size(); i++)
+ *         {
+ *             out<< s[i];
+ *         }
+ *
+ *         return out;
+ *     }
+ */
         
     // 输入
+    // istream& operator>>(iostream& in, const string& s)
 
     void push_back(char ch)
     {
@@ -325,11 +375,11 @@ public:
             _capacity = newcapacity;
         }
 
-        strcpy(_str+_size, str);
+        strcpy(_str+_size, str); // strcpy会拷贝\0的
         _size = _size + len;
     }
 
-    void reserve(int n)
+    void reserve(size_t n)
     {
         if(n > _capacity)
         {
@@ -530,6 +580,7 @@ void test()
 
 // 范围for最终会被编译器替换成迭代器
 // iterator begin() end()  有这三个东西才行的
+// 迭代器和容器有关系的。
     for(auto e : s2)
     {
         cout<< e << " ";
@@ -552,12 +603,6 @@ void test()
     
     cout<< s2 <<endl;
 }
-
-    
-
-
-
-
 }
 
 
