@@ -60,7 +60,7 @@ public:
 
         _str = tmp;
         _size = that._size;
-        _capacity = that._capacity;
+        _capacity = that._capacity + 1;
       }
       return *this;
     }
@@ -89,13 +89,12 @@ public:
     {
       if(n > _capacity)
       {
-          char* tmp = new char[n + 1]; // 多开一个进行存储\0
-          strcpy(tmp, _str);
-          
+          char* newStr= new char[n + 1]; // 多开一个进行存储\0
+          strcpy(newStr, _str);
           delete[] _str;
-          _str = tmp;
+          _str = newStr;
           _capacity = n;
-      }
+      } 
     }
     
     void push_back(char ch)
@@ -103,12 +102,7 @@ public:
       if(_size == _capacity)
       {
         size_t newCapacity = _capacity == 0 ? 2 : _capacity*2;
-        char* newStr = new char[newCapacity + 1];
-        strcpy(newStr, _str);
-        delete[] _str;
-
-        _str = newStr;
-        _capacity = newCapacity;
+        reserve(newCapacity);
       }
 
       _str[_size] = ch;
@@ -118,7 +112,109 @@ public:
     
     void append(const char* str)
     {
+        size_t len = strlen(str);
+       if(_size + len > _capacity) 
+       {
+         reserve(_size + len);
+       }
 
+       strcpy(_str + _size, str);
+       _size += len;
+    }
+
+    string& operator+=(char ch)
+    {
+      this->push_back(ch);
+      return *this;
+    }
+
+    string& operator+=(const char* str)
+    {
+      this->append(str);
+      return *this;
+    }
+    
+    string& insert(size_t pos, char ch)
+    {
+      assert(pos <= _size);
+      if(_size == _capacity)
+      {
+        size_t newCapacity = _capacity == 0 ? 2 : _capacity * 2;
+        reserve(newCapacity);
+      }
+        
+      for(size_t i = _size; i > pos; i--)
+      {
+        _str[i] = _str[i-1];
+      }
+
+      _str[pos] = ch;
+      ++_size;
+      _str[_size] = '\0';
+      
+      return *this;
+    }
+
+    string& insert(size_t pos, const char* str)
+    {
+      assert(pos <= _size);
+      size_t len = strlen(str);
+      if(_size + strlen(str) > _capacity)
+      {
+          reserve(_size + len);
+      }
+      
+      for(size_t i = _size; i > pos; i--)
+      {
+        _str[i + len - 1] = _str[i - 1];
+      }
+      
+      strncpy(_str+pos, str, len);
+
+      _size += len;
+
+      return *this;
+    }
+
+    void resize(size_t n, char ch = '\0')
+    {
+      if(n < _size)
+      {
+        _str[n] = '\0';
+        _size = n;
+      }
+      else 
+      {
+        if(n > _capacity)
+        {
+          reserve(n);
+        }
+
+        for(size_t i = _size; i < n; i++)
+        {
+          _str[i] = ch;
+        }
+
+        _size = n;
+        _str[_size] = '\0';
+      }
+    }
+    
+    void erase(size_t pos, size_t len)
+    {
+      assert(pos < _size);
+       if(pos + len >= _size)
+       {
+          _str[pos] = '\0';
+          _size =  pos;
+       }
+       else 
+       {
+         for(size_t i = pos + len; i <= _size; i++)
+         {
+           _str[i-len] = _str[i];
+         }
+       }
     }
 
     const char* c_str() const 
@@ -144,6 +240,7 @@ public:
     char* _str;
     size_t _size;
     size_t _capacity;
+    static size_t npos;
 };
     std::ostream& operator<<(std::ostream& out, const string& s)
     {
@@ -153,9 +250,10 @@ public:
       }
       return out;
     }
+  size_t string::npos = -1;
 }
 
-int main()
+void test1()
 {
   lic::string s("aaaaaaaaaaaaa");
   lic::string s1(s);
@@ -182,21 +280,85 @@ int main()
 
   for(size_t i = 0; i < s1.size(); i++)
   {
-    s[i] -= 2;
+    s1[i] -= 2;
     std::cout<< s1[i];
   }
   std::cout<<std::endl;
 
+  s1.append("lichermionex");
 
+  for(size_t i = 0; i < s1.size(); i++)
+  {
+    std::cout<< s1[i];
+  }
+  std::cout<<std::endl;
 
+  s1 += 'a';
+  s1 += 'b';
+  s1 += 'c';
+  for(size_t i = 0; i < s1.size(); i++)
+  {
+    std::cout<< s1[i];
+  }
+  std::cout<<std::endl;
 
+  s1 += "fadsfasdfs";
+  for(size_t i = 0; i < s1.size(); i++)
+  {
+    std::cout<< s1[i];
+  }
+  std::cout<<std::endl;
 
+// 字符串数组，结尾\0
+// 三部分(\0不算有效字符)
+// _str      指针
+// _size     已经有多少个字符
+// _capacity 能够放多少个字符
+  std::cout<< s1.size() << std::endl;
+  
+  s1.insert(43,'a');
+  s1.insert(44,'b');
+  s1.insert(45,'c');
 
+  for(size_t i = 0; i < s1.size(); i++)
+  {
+    std::cout<< s1[i];
+  }
+  std::cout<<std::endl;
 
+  s1.insert(0, "licherminonn");
 
+  for(size_t i = 0; i < s1.size(); i++)
+  {
+    std::cout<< s1[i];
+  }
+  std::cout<<std::endl;
 
+  std::cout<< s1.size() << std::endl;
+  s1.insert(58,"asfasdfdsafsdf");
 
+  for(size_t i = 0; i < s1.size(); i++)
+  {
+    std::cout<< s1[i];
+  }
+  std::cout<<std::endl;
+}
 
+void test2()
+{
+  lic::string s;
+  s.append("afdsssfadfasdf");
+  s.erase(1,3);
 
+  for(size_t i = 0; i < s.size(); i++)
+  {
+    std::cout<< s[i];
+  }
+  std::cout<<std::endl;
+}
+
+int main()
+{
+  test2();
   return 0;
 }
