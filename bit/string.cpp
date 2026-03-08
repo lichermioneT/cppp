@@ -9,6 +9,7 @@ namespace lic
 class string 
 {
   friend std::ostream& operator<<(std::ostream& out, const string& s);
+  friend std::istream operator>>(std::istream& in, string& s);
 public:
 
 /*
@@ -217,6 +218,65 @@ public:
        }
     }
 
+    size_t find(char ch, size_t pos = 0)
+    {
+      assert(pos < _size);
+      for(size_t i = pos; i < _size; i++)
+      {
+        if(_str[i] == ch)
+        {
+          return i;
+        }
+      }
+      return npos;
+    }
+
+    size_t find(const char* str, size_t pos)
+    {
+      assert(pos < _size);
+      char* p = strstr(_str, str);
+      if(p == nullptr)
+      {
+        return npos;
+      }
+      else 
+      {
+        return p - _str;
+      }
+    }
+
+    bool operator<(const string& s)
+    {
+      int ret = strcmp(_str, s._str);
+      return ret < 0;
+    }
+
+    bool operator==(const string& s)
+    {
+      int ret = strcmp(_str, s._str);
+      return ret == 0;
+    }
+      
+    bool operator<=(const string& s)
+    {
+      return *this < s || *this == s;
+    }
+
+    bool operator>(const string& s)
+    {
+      return !(*this <= s);
+    }
+
+    bool operator>=(const string& s)
+    {
+      return !(*this < s);
+    }
+
+    bool operator!=(const string& s)
+    {
+      return !(*this == s);
+    }
+
     const char* c_str() const 
     {
       return _str;
@@ -250,6 +310,25 @@ public:
       }
       return out;
     }
+    
+    std::istream& operator>>(std::istream& in, string& s)
+    {
+        while(1)
+        {
+          char ch;
+          ch = in.get();
+          if(ch == ' ' || ch == '\0')
+          {
+            break;
+          }
+          else 
+          {
+            s += ch;
+          }
+        }
+        return in;
+    }
+
   size_t string::npos = -1;
 }
 
@@ -355,6 +434,51 @@ void test2()
     std::cout<< s[i];
   }
   std::cout<<std::endl;
+
+  
+}
+
+namespace lic2
+{
+class string 
+{
+  public:
+  string(const char* str = "")
+    :_str(new char[strlen(str) + 1]
+    {
+      strcpy(_str, str);
+    }
+  
+   // 深拷贝的现代写法
+   // 拷贝一个临时对象，然后交换一下。
+   string(const string& s)
+    :_str(nullptr) // 防止随机值
+    {
+      string temp(s._str); // 临时对象会析构
+      std::swap(_str, temp._str);
+    }
+    
+    sting& operator=(const string& s)
+    {
+      if(this != &s)
+      {
+        string temp(s);
+        std::swap(_str, temp._str);
+      }
+      return *this;
+    }
+
+  ~string()
+  {
+    delete[] _str;
+    _str = nullptr;
+  }
+
+  
+
+private:
+  char* _str;
+};
 }
 
 int main()
