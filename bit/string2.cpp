@@ -82,6 +82,7 @@ public:
   {
     return _str + _size;
   }
+
 public:
   size_t size() const 
   {
@@ -123,7 +124,8 @@ public:
     _str[0] = '\0';
   }
   
-  void reserve(size_t n)
+// reserve 无论空间大小都不会改变_size的，可能只会改变_capacity;
+  void reserve(size_t n) // 预定空间的
   {
     if(n <= _capacity)
     {
@@ -138,6 +140,8 @@ public:
     _capacity = n;
   }
   
+// resize改变size的，resize变小了，很简单
+// resize变大了，就是用缺省参数进行补充的
   void resize(size_t n, char ch = '\0')
   {
     if(n < _size)

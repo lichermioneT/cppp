@@ -4,15 +4,13 @@ using namespace std;
 int singleNumber(vector<int>& nums)
 {
     int val = 0;
-    for(int i = 0; i < nums.size(); i++)
+    for(size_t i = 0; i < nums.size(); i++)
     {
          val ^= nums[i]; // 异或，相异为1，相同为0.
                          // 0异或任何数等于任何数。
     }
     return val;
 }
-
-
 
 class Solution {
 public:
@@ -29,7 +27,6 @@ public:
                 }
             }
         }
-
         int num = 0;
         for(size_t i = 0; i < 32; ++i)
         {
@@ -38,16 +35,17 @@ public:
                 num |= (1 << i);
             }
         }
-
         return num;
     }
 };
-
+// 136
+// 137
+// 260
 
 // 迭代器失效
+// 动态增长的数组,扩容可能会导致迭代器的实效。
 void test()
 {
-    
     vector<int> v = {1,2,3,4,5,6,7,8,9,10};
 
     // vector<int>::iterator it = v.begin();
@@ -64,9 +62,14 @@ void test()
     cout<<endl;
 }
 
+/*
+ *删除单个元素时：返回被删除位置后面那个元素的新迭代器
+ *删除一个区间时：返回区间末尾后面那个元素的新迭代器
+ *如果删除后已经到末尾了，就返回 end()
+ */
+
 void test2()
 {
-    
     vector<int> v = {1,2,3,4,5,6,7,8,9,10};
     vector<int>::iterator it = v.begin();
 
@@ -87,51 +90,7 @@ void test2()
         cout<< e << " ";
     }
     cout<<endl;
-
-
 }
-
-
-
-
-
-
-
-
-
-
-
-
-
-
-
-
-
-
-
-
-
-
-
-
-
-
-
-
-
-
-
-
-
-
-
-
-
-
-
-
-
-
 
 int main()
 {
