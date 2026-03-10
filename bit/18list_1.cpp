@@ -4,69 +4,39 @@
 using namespace std;
 
 
-void test4()
+void test5()
 {
-  list<int> lt;
-  lt.push_back(1);
-  lt.push_back(2);
-  lt.push_back(3);
-  lt.push_back(4);
-  lt.push_front(4);
-  lt.push_front(100);
-  lt.push_front(3);
-  lt.push_front(2);
-  lt.push_front(1);
+  list<int> lt1;
+  for(size_t  i = 0; i < 10; i++)
+  {
+    lt1.push_back(i);
+  }
   
-  for(auto e : lt)
+  list<int>::iterator it = lt1.begin();
+  while(it != lt1.end())
+  {
+    if(*it % 2 == 0)
+    {
+      it = lt1.erase(it); // erase返回值是删除数据的下一位位置。
+    }
+    else 
+    {
+      ++it;
+    }
+  }
+  
+  for(auto& e : lt1)
   {
     cout<< e << " ";
   }
   cout<<endl;
-
-
-// find函数注意判断 不等于end();
-  list<int>::iterator pos = find(lt.begin(), lt.end(), 100);
-  if(pos != lt.end())
-  {
-    lt.insert(pos, 8888); // 迭代器失效了吗
-    lt.erase(pos);
-  }
-
-  for(auto e : lt)
-  {
-    cout<< e << " ";
-  }
-  cout<<endl;
-
-  
-
 }
 
 int main()
 {
 //学习容器，容器的构造函数，析构，=
 //反向迭代器，反着走的, 所以是++的
-  test4();
-
-
-
-
-
-
-
-
-
-
-
-
-
-
-
-
-
-
-
-
+  test5();
     return 0;
 }
 
@@ -186,4 +156,39 @@ void test3()
   print_cons_list(lt1);
 }
 
+
+void test4()
+{
+  list<int> lt;
+  lt.push_back(1);
+  lt.push_back(2);
+  lt.push_back(3);
+  lt.push_back(4);
+  lt.push_front(4);
+  lt.push_front(100);
+  lt.push_front(3);
+  lt.push_front(2);
+  lt.push_front(1);
+  
+  for(auto e : lt)
+  {
+    cout<< e << " ";
+  }
+  cout<<endl;
+
+
+// find函数注意判断 不等于end();
+  list<int>::iterator pos = find(lt.begin(), lt.end(), 100); // find函数[)
+  if(pos != lt.end())
+  {
+    lt.insert(pos, 8888); // 迭代器失效了吗, insert插入返回迭代器的位置是，插入的那个数据
+    lt.erase(pos);        // erase是删除数据的下一个位置的
+  }
+
+  for(auto e : lt)
+  {
+    cout<< e << " ";
+  }
+  cout<<endl;
+}
 
