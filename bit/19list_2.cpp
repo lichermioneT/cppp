@@ -1,39 +1,78 @@
 #include <iostream>
 using namespace std;
 
+
+// list的node信息
 template<class T>
 struct __list_node 
 {
-  __list_node(const T& x)
+  __list_node(const T& x = T())
       :_next(nullptr)
       ,_prev(nullptr)
       ,_data(x)
   {}
+
   __list_node<T>* _next;
   __list_node<T>* _prev;
   T _data;
 };
 
+// list的iterator信息
+// iterator封装了node的使用方法了的
 template<class T>
 struct __list_iterator
 {
-  typedef __list_iterator<T> node;
-  node* _node;
+  typedef __list_node<T> Node; 
+  Node* _node;
 
-  __list_iterator(node* x)
-      :_node(x)
+  __list_iterator(Node* node)
+      :_node(node)
   {}
-
+  
+  //*it 可以读可以写
   T& operator*()
   {
     return _node->_data;
   }
 
-  __list_iterator<T>& operator++()
+ __list_iterator<T>& operator++() // 这是前置++
   {
-    _node = _node->_node;
-    return _node;
+    _node = _node->_next;
+    return *this;
   }
+
+
+ __list_iterator<T>& operator++(int) 
+ {
+   __list_iterator<T> tmp(*this);
+   // _node = _node->_next;
+   ++(*this);
+    return tmp;
+ }
+  
+
+ __list_iterator<T>& operator--()
+ {
+   _node = _node->_prev;
+   return *this;
+ }
+
+ __list_iterator<T>& operator--(int)
+ {
+   __list_iterator<T> tmp(*this);
+   // _node = _node->_prev;
+   --(*this);
+   return tmp;
+ }
+  T* operator->()
+  {
+    return &_node->_data;
+  }
+
+ bool operator!=(const __list_iterator<T>& it)
+ {
+   return _node != it._node;
+ }
 
 };
 
@@ -42,12 +81,40 @@ class list
 {
 typedef __list_node<T> node;
 public:
+  typedef __list_iterator<T> iterator;
+  iterator begin()
+  {
+    return iterator(_head->_next);
+  }
+  
+  iterator end()
+  {
+    return iterator(_head);  // 注意这里的end是_head
+  }
+
 // 代头双向循环链表的
   list()
   {
     _head = new node;
     _head->_next = _head;
-    _head->_preva = _head;
+    _head->_prev = _head;
+  }
+
+  ~list()
+  {
+    clear();
+    delete _head;
+
+    _head = nullptr;
+  }
+
+  void clear()
+  {
+    iterator it = begin();
+    while(it != end())
+    {
+      erase(it++);
+    }
   }
 
   void push_back(const T& x)
@@ -58,16 +125,56 @@ public:
       tail->_next = newNode;
       newNode->_prev = tail;
 
-      tail->_next = _head;
+      newNode->_next = _head;
       _head->_prev = newNode;
   }
+  
+  void pop_bac()
+  {
+
+  }
+
+  void push_front(const T& x)
+  {
+
+  }
+  
+  void pop_front()
+  {
+
+  }
+
 private:
   node* _head;
 };
 
 
+void test2()
+{
+  struct Date 
+  {
+    int year = 1;
+    int month = 1;
+    int day = 1;
+  };
+  
+  list<Date> lt1;
+  lt1.push_back(Date());
+  lt1.push_back(Date());
+  list<Date>::iterator it = lt1.begin();
 
+  while(it != lt1.end())
+  {
+    /*
+     *cout<< *it << " ";   //  注意自定义类型你没有重载输出的  这里迭代器是为了 模拟指针的行为的 
+     */
+          // it.operator->() 
+    cout<< it->year << " " << it->year << " "<< it->month <<endl;
+    ++it;
+  }
 
+  cout<<endl;
+}
 
 
 
@@ -76,13 +183,25 @@ int main()
 // list的迭代器
 // 一个类型取封装节点的指针，构成一个自定义类型
 // 然后重载* ++等运算符，就可以达到我们的要求的
+  
+  test2();
+
+  return 0;
+}
+
+void test()
+{
   list<int> lt1;
   lt1.push_back(1);
   lt1.push_back(2);
   lt1.push_back(3);
   lt1.push_back(4);
   lt1.push_back(5);
-
-
-  return 0;
+  list<int>::iterator it = lt1.begin();
+  while(it != lt1.end())
+  {
+    cout<< *it << " ";
+    ++it;
+  }
+  cout<<endl;
 }
