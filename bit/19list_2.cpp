@@ -1,12 +1,11 @@
 #include <iostream>
 using namespace std;
 
-
 // list的node信息
 template<class T>
 struct __list_node 
 {
-  __list_node(const T& x = T())
+  __list_node(const T& x = T()) // 这里会让内置类型初始化为零的
       :_next(nullptr)
       ,_prev(nullptr)
       ,_data(x)
@@ -46,7 +45,7 @@ struct __list_iterator
     return *this;
   }
 
- Self& operator++(int) 
+ Self operator++(int) 
  {
    Self tmp(*this);
    // _node = _node->_next;
@@ -60,7 +59,7 @@ struct __list_iterator
    return *this;
  }
 
- Self& operator--(int)
+ Self operator--(int)
  {
    Self tmp(*this);
    // _node = _node->_prev;
@@ -68,18 +67,29 @@ struct __list_iterator
    return tmp;
  }
 
- bool operator!=(const Self& it)
+ bool operator!=(const Self& it) const
  {
    return _node != it._node;
+ }
+
+ bool operator==(const Self& it) const
+ {
+   return _node == it._node;
  }
 };
 
 template<class T>
 class list 
 {
-typedef __list_node<T> node;
+typedef __list_node<T> Node;
 public:
-  typedef __list_iterator<T, Ref, Ptr> iterator;
+  typedef __list_iterator<T, T&, T*> iterator;
+  typedef __list_iterator<const T, const T&, const T*> const_iterator;
+
+// 这里构造函数重载，是因为隐含的this指针
+// list* const this
+// const list* const this  
+// 参数的类型不一样的
   iterator begin()
   {
     return iterator(_head->_next);
@@ -90,10 +100,20 @@ public:
     return iterator(_head);  // 注意这里的end是_head
   }
 
+  const_iterator begin() const 
+  {
+    return const_iterator(_head->_next);
+  }
+
+  const_iterator end() const 
+  {
+    return const_iterator(_head);
+  }
+
 // 代头双向循环链表的
   list()
   {
-    _head = new node;
+    _head = new Node;
     _head->_next = _head;
     _head->_prev = _head;
   }
@@ -119,14 +139,17 @@ public:
 
   void push_back(const T& x)
   {
-      node* newNode = new node(x);
-      node* tail = _head->_prev;
 // list有没有数据插入都是一样的呢
-      tail->_next = newNode;
-      newNode->_prev = tail;
-
-      newNode->_next = _head;
-      _head->_prev = newNode;
+/*
+ *      Node* newNode = new Node(x);
+ *      Node* tail = _head->_prev;
+ *      tail->_next = newNode;
+ *      newNode->_prev = tail;
+ *
+ *      newNode->_next = _head;
+ *      _head->_prev = newNode;
+ */
+    insert(end(), x); // 需要理解
   }
   
   void pop_back()
@@ -136,18 +159,96 @@ public:
 
   void push_front(const T& x)
   {
-
+    insert(begin(), x);
   }
   
   void pop_front()
   {
 
   }
+  
+  void insert(iterator pos, const T& x)
+  {
+    Node* cur = pos._node; 
+    Node* prev = cur->_prev;
+
+    Node* newNode = new Node(x);
+  
+    // prev newNode cur
+    prev->_next = newNode;
+    newNode->_prev = prev;
+
+    newNode->_next = cur;
+    cur->_prev = newNode;
+  }
+
+
 
 private:
-  node* _head;
+  Node* _head;
 };
 
+void print_list(const list<int>& lt)
+{
+  /*
+   *for(auto& e: lt)
+   *{
+   *  cout<< e << " ";
+   *}
+   *cout<<endl;
+   */
+
+
+  list<int>::const_iterator it = lt.begin();
+  while(it != lt.end())
+  {
+    cout<< *it << " ";
+    ++it;
+  }
+  cout<<endl;
+}
+
+void test3()
+{
+  list<int> lt1;
+  lt1.push_back(1);
+  lt1.push_back(2);
+  lt1.push_back(3);
+  lt1.push_back(4);
+  lt1.push_back(5);
+  print_list(lt1);
+}
+
+
+
+
+int main()
+{
+// list的迭代器
+// 一个类型取封装节点的指针，构成一个自定义类型
+// 然后重载* ++等运算符，就可以达到我们的要求的
+// 头文件的展开了，顺序注意一哈的
+ test3(); 
+
+  return 0;
+}
+
+void test()
+{
+  list<int> lt1;
+  lt1.push_back(1);
+  lt1.push_back(2);
+  lt1.push_back(3);
+  lt1.push_back(4);
+  lt1.push_back(5);
+  list<int>::iterator it = lt1.begin();
+  while(it != lt1.end())
+  {
+    cout<< *it << " ";
+    ++it;
+  }
+  cout<<endl;
+}
 
 void test2()
 {
@@ -169,40 +270,9 @@ void test2()
      *cout<< *it << " ";   //  注意自定义类型你没有重载输出的  这里迭代器是为了 模拟指针的行为的 
      */
           // it.operator->() 
-    cout<< it->year << " " << it->year << " "<< it->month <<endl;
+    cout<< it->year << " " << it->month << " "<< it->month <<endl;
     ++it;
   }
 
-  cout<<endl;
-}
-
-
-
-int main()
-{
-// list的迭代器
-// 一个类型取封装节点的指针，构成一个自定义类型
-// 然后重载* ++等运算符，就可以达到我们的要求的
-// 头文件的展开了，顺序注意一哈的
-  
-  test2();
-
-  return 0;
-}
-
-void test()
-{
-  list<int> lt1;
-  lt1.push_back(1);
-  lt1.push_back(2);
-  lt1.push_back(3);
-  lt1.push_back(4);
-  lt1.push_back(5);
-  list<int>::iterator it = lt1.begin();
-  while(it != lt1.end())
-  {
-    cout<< *it << " ";
-    ++it;
-  }
   cout<<endl;
 }
