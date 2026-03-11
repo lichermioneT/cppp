@@ -1,4 +1,5 @@
 #include <iostream>
+#include <cassert>
 using namespace std;
 
 // list的node信息
@@ -30,12 +31,12 @@ struct __list_iterator
   {}
   
   //*it 可以读可以写
-  T& operator*()
+  Ref& operator*()
   {
     return _node->_data;
   }
 
-  T* operator->()
+  Ptr operator->()
   {
     return &_node->_data;
   }
@@ -84,7 +85,7 @@ class list
 typedef __list_node<T> Node;
 public:
   typedef __list_iterator<T, T&, T*> iterator;
-  typedef __list_iterator<const T, const T&, const T*> const_iterator;
+  typedef __list_iterator<T, const T&, const T*> const_iterator;
 
 // 这里构造函数重载，是因为隐含的this指针
 // list* const this
@@ -118,24 +119,67 @@ public:
     _head->_prev = _head;
   }
 
+  list(const list<T>& lt)
+  {
+    // 注意这里同样也是深拷贝的
+    _head = new Node;
+    _head->_next = _head;
+    _head->_prev = _head;
+    
+    /*
+     *const_iterator it = lt.begin();
+     *while(it != lt.end())
+     *{
+     *  push_back(*it);
+     *  ++it;
+     *}
+     */
+  
+    for(auto e : lt)
+    {
+      push_back(e);
+    }
+  }
+
 /*
- *  ~list()
+ *  list<T>& operator=(list<T>& lt)
  *  {
- *    clear();
- *    delete _head;
- *
- *    _head = nullptr;
- *  }
- *
- *  void clear()
- *  {
- *    iterator it = begin();
- *    while(it != end())
+ *    
+ *    if(this != &lt)
  *    {
- *      erase(it++);
+ *      clear();
+ *
+ *      for(auto e : lt)
+ *      {
+ *        push_back(e);
+ *      }
  *    }
+ *
+ *    return *this;
  *  }
  */
+
+  list<T>& operator=(list<int> it) // 这里是传值拷贝数据的。
+  {
+    swap(_head, it._head); // 头结点给一个临时对象的。
+    return *this;
+  }
+
+  ~list()
+  {
+    clear();
+    delete _head;
+    _head = nullptr;
+  }
+
+  void clear()
+  {
+    iterator it = begin();
+    while(it != end())
+    {
+      erase(it++);
+    }
+  }
 
   void push_back(const T& x)
   {
@@ -154,7 +198,7 @@ public:
   
   void pop_back()
   {
-
+    erase(end());
   }
 
   void push_front(const T& x)
@@ -164,7 +208,7 @@ public:
   
   void pop_front()
   {
-
+    erase(begin());
   }
   
   void insert(iterator pos, const T& x)
@@ -182,7 +226,18 @@ public:
     cur->_prev = newNode;
   }
 
+  void erase(iterator pos)
+  {
+    assert(pos != end());
+    Node* cur = pos._node;
+    Node* prev = cur->_prev;
+    Node* next = cur->_next;
 
+    delete cur;
+
+    prev->_next = next;
+    next->_prev = prev;
+  }
 
 private:
   Node* _head;
@@ -216,10 +271,33 @@ void test3()
   lt1.push_back(3);
   lt1.push_back(4);
   lt1.push_back(5);
-  print_list(lt1);
+  lt1.push_front(3333);
+  lt1.push_front(1);
+  lt1.push_front(2);
+  lt1.push_front(3);
+  lt1.push_front(4);
+  lt1.push_front(5);
+
+  list<int> lt2(lt1);
+  print_list(lt2);
+
+  list<int> lt3;
+
+  lt3 = lt1;
+
+  print_list(lt3);
 }
 
 
+// 1.vector和list的区别
+//  vector动态增长的数组，随机访问，operator[] 支持排序，二分查找，堆的算法
+//  头部或者中间数据插入效率比较低下的 + 增容的代价比较大的
+//  list是一个代头的的双向循环链表,任意位置，插入，删除效率on(1);
+//  缺点是不支持随机访问的
+//  vector和list是一个相辅相成，互补的一个容器的
+// 2.vector和list的底层实现
+// 3.vector如何增容
+// 4.什么是迭代器失效
 
 
 int main()
@@ -228,6 +306,16 @@ int main()
 // 一个类型取封装节点的指针，构成一个自定义类型
 // 然后重载* ++等运算符，就可以达到我们的要求的
 // 头文件的展开了，顺序注意一哈的
+
+// list迭代器失效
+// _head 1 2 3 4 5
+// lt.erase(it) //3位置的空间已经被释放了，你不能够进行访问的
+// 所以erase是返回迭代器的下一个位置的
+// insert() 
+
+
+// insert 插入新元素的位置
+// erase  被删除元素的下一个位置
  test3(); 
 
   return 0;
