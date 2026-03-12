@@ -1,8 +1,11 @@
 #include <iostream>
+#include <algorithm>
 #include <functional>
 #include <vector>
 using namespace std;
 
+//仿函数，对象重载()了的
+//优先级队列，底层通过仿函数，进行控制大小堆，实现的
 template<class T>
 struct Less 
 {
@@ -62,7 +65,7 @@ private:
       /*
        *if(_con[child] > _con[parent])
        */
-      if(_con[parent], _con[child])
+      if(com(_con[parent], _con[child]))
       {
         swap(_con[child], _con[parent]);
         parent = child;
@@ -114,6 +117,10 @@ void test1()
   pq.push(9);
   pq.push(5);
   pq.push(7);
+  pq.push(4);
+  pq.push(6);
+  pq.push(1);
+  pq.push(0);
   while(!pq.empty())
   {
     cout<< pq.top() << " ";
@@ -126,8 +133,46 @@ void test1()
 //全部公用struct, 私有公用class
 //仿函数,实际上是重载了(),它的对象可以向函数一样去使用的。
 
-
 // 不要意思c++这里写错了的
+
+// vector<int> v
+// sort()排序
+// sort(v.begin(), v.end())
+// greater
+// sort(v.begin(), v.end(), less<)
+
+
+void test3()
+{
+  vector<int> v;
+  v.push_back(1);
+  v.push_back(3);
+  v.push_back(5);
+  v.push_back(34);
+  v.push_back(98);
+  v.push_back(33);
+  v.push_back(34);
+  sort(v.begin(), v.end());
+  for(auto e : v)
+  {
+    cout<<e << " ";
+  }
+  cout<<endl; 
+  sort(v.begin(), v.end(), greater<int>());
+  for(auto e : v)
+  {
+    cout<<e << " ";
+  }
+  cout<<endl; 
+}
+
+
+// 容器：string/vector/list/deque 
+// 适配器：stack/queue/priority_queue 
+// 迭代器：iterator const_iterator r cr 
+// 算法： find,sort,reverse
+// 仿函数：less/greater
+// STL源码解析
 
 int main()
 {
@@ -154,10 +199,13 @@ int main()
 // 完全二叉树
 // 需要和下标完全结合在一起的
 //   
-  test1();
-  Less<int> lessfunc;
-  cout<< lessfunc(1, 2) <<endl;
-  cout<< lessfunc.operator()(100, 2) <<endl;
+  /*
+   *test1();
+   *Less<int> lessfunc;
+   *cout<< lessfunc(1, 2) <<endl;
+   *cout<< lessfunc.operator()(100, 2) <<endl;
+   */
+  test3();
 
   return 0;
 }

@@ -1,5 +1,5 @@
 
-// #include<iostream>
+ #include<iostream>
 
 // #include<cstring>
 
@@ -270,7 +270,7 @@ private:
 
 
 
-int main()
+int xain()
 {
 
 
