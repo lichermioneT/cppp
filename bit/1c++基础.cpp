@@ -15,7 +15,6 @@ using namespace std; // c++库所有东西都在std命名空间里面
 3.函数重载 extern "c" 修饰函数，让函数按照c语言的规则去编译
 4.引用
 5.临时变量具有常属性
-
 */
 
 
@@ -28,7 +27,6 @@ namespace N
         return x + y;
     }
 }
-
 
 void Func(int x = 1, int y = 2, int z = 3)
 {
@@ -44,7 +42,6 @@ void Func2(int x, int y = 2, int z = 3)
     cout<< "z = " << z <<endl;
 }
 
-
 int add(int x, int y)
 {
     return x + y;
@@ -59,7 +56,6 @@ int add(int x, int y, double d)
 {
     return x + y + (int)d;
 }
-
 
 extern "C"  int sub(int x, int y)
 {
@@ -105,7 +101,6 @@ int main()
     cout<< "ch = " << ch <<endl;
 */
 
-
 // 缺省参数
 // 半缺省只能是从右往左
 // 参数连续串
@@ -133,7 +128,6 @@ int main()
 // g++ -c test.cpp -o test.o
 // nm test.o
 //  
-
 
 // 引用
 // 引用语法
