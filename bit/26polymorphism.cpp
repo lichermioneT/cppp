@@ -2,16 +2,63 @@
 using namespace std;
 // 多态是在不同继承关系的类对象，去调用同一函数，产生了不同的行为。
 
-// 抽象类，纯虚函数=0；
-// 1.强制完成子类去完成重写的
-// 2.抽象。就是在显示社会不存在的实体。（car)什么车都去继承它的。
+// 静态绑定：编译 时
+// 动态绑定：运行 时
+//
+
+
+// 单继承和多继承的虚表
+// 继承的时候虚函数表也会继承的。
+// 重写的就重写，不重写的指向基类的函数 
+
+class Base1 
+{
+public:
+ virtual void func1() {cout << "Base1::func1" << endl;}
+ virtual void func2() {cout << "Base1::func2" << endl;}
+private:
+ int b1;
+};
+class Base2 
+{
+public:
+ virtual void func1() {cout << "Base2::func1" << endl;}
+ virtual void func2() {cout << "Base2::func2" << endl;}
+private:
+ int b2;
+};
+class Derive : public Base1, public Base2 
+{
+public:
+ virtual void func1() {cout << "Derive::func1" << endl;}
+ virtual void func3() {cout << "Derive::func3" << endl;}
+private:
+ int d1;
+};
+
+typedef void(* VF_PTR)(); // 函数指针
+void print_VFTable(VF_PTR* ptable)
+{
+  for(size_t i = 0; ptable[i] != 0; ++i)
+  {
+    printf("vftable[%zu] : %p \n", i, ptable[i]);
+  }
+  cout<<endl;
+}
+
+
+// 先继承的放到前面了。
+//
+// 内联函数没有地址，
+// 静态函数没有this值，不能够访问对象的
 
 int main()
 {
-
-
-
-
+  /*
+   *Base1 b;
+   *Derive d;
+   *print_VFTable((VF_PTR*)(*(int*)&b));
+   */
 
 /*
  *    Person ps;
@@ -125,3 +172,106 @@ void test1()
 //1.重载：同一个作用域，函数名一样，函数参数类型不一样(个数或者类型不一样的)
 //2.重写(覆盖):基类和派生类之间的关系。函数名，参数，返回值必须一样的，两个函数必须是虚函数。协办例外的。重写就是为了多态的。
 //3.重定义(隐藏)：基类和派生类，函数名字一样的，基类和派生类的同名函数不是重写，就是重定义的。
+
+
+
+
+// 抽象类，纯虚函数=0；
+// 1.强制完成子类去完成重写的
+// 2.抽象。就是在显示社会不存在的实体。（car)什么车都去继承它的。
+class car 
+{
+public:
+    virtual void test() = 0;
+};
+
+class modexy : public car 
+{
+public:
+  virtual void test()
+  {
+    cout<< "Tesla 值最棒的电动车" <<endl;
+  }
+};
+
+void test3()
+{
+  modexy y;
+  y.test();
+}
+// a 
+// d
+// c
+// a
+// b
+
+
+// 虚函数的继承就是：接口继承
+// 普通的继承就是：  实现继承
+
+
+// 多态的实现原理的
+// 虚函数表指针：虚表指针的。
+
+class base 
+{
+public:
+  virtual void func1()
+  {
+    cout<< "func1" <<endl;
+  }
+  virtual void func2()
+  {
+    cout<< "func2" <<endl;
+  }
+
+private:
+  int _a;
+};
+
+void test4()
+{
+  cout<< sizeof(base) <<endl;
+}
+
+// 一个指针(存放一个地址)8字节
+// 一个int4字节
+// 按照最大成员的对其倍数
+// 所以是16的。
+
+// 如何实现指向谁，就去调用谁的原理呢？
+// 多态是在运行时-到指向的对象的虚表中查
+// 找，要调用的虚函数的地址，然后指向的。
+
+// 对象模型
+// 虚函数表
+// 其它东西
+//
+// 虚函数是运行的时候查表
+
+class person {
+public:
+ virtual void BuyTicket() { cout << "买票-全价" << endl; }
+};
+class student : public person {
+public:
+ virtual void BuyTicket() { cout << "买票-半价" << endl; }
+};
+
+// 现在它根本不知道是那个的虚函数呢？
+void Func(person& p) // 传入那个对象，就去那个对象的虚函数表里面去找的。
+{
+ p.BuyTicket();
+}
+
+
+// 单继承和多继承关系的虚函数表
+// 虚函数表，函数指针数组。
+// 派生类会拷贝基类的虚函数，然后进行重写(或者不重写的)
+//
+// 虚表存的指针
+// 虚函数存在哪儿？ 代码段 
+// 虚函数表呢？     代码段，常量区域的。(只需要存，代码的实现的函数的地址就行了。)    
+// 虚表早就生成了的。因为函数已经生成好了的
+//
+//
