@@ -12,7 +12,7 @@ using namespace std;
 template<class k, class v>
 struct BSTreeNode
 {
-    BSTreeNode(const k& key, const k& value )
+    BSTreeNode(const k& key, const v& value )
         :left(nullptr)
         ,right(nullptr)
         ,_Key(key)
@@ -296,17 +296,51 @@ void test()
   string  str;
   while(cin>>str)
   {
-    BSTree<string, string>* ret = dict.Find(str);
+    BSTreeNode<string, string>* ret = dict.Find(str);
     if(ret != nullptr)
     {
-      cout<< ret.->_value<<endl;
+      cout<< ret->_value <<endl;
+    }
+    else 
+    {
+      cout<< "没有中文翻译" <<endl;
     }
   }
 }
 
+void test2()
+{
+  string strs[] = {"西瓜", "西瓜","西瓜", "香蕉", "香蕉","苹果", "苹果" };
+  BSTree<string, int> num;
+  for(auto e : strs)
+  {
+    BSTreeNode<string, int>* ret = num.Find(e);
+    if(ret == nullptr) // 没有就插入
+    {
+      num.Insert(e, 1);
+    }
+    else 
+    {
+      ret->_value++; // 有就++
+    }
+  }
+  num.InOrder();
+}
+
+
 
 // key模型，判断在不在的
 // key/value模型，通过key找value
+
+// 中英互译
+// 统计次数的
+
+// 缺陷出来了
+// 会退化成链表的(插入的数据接近有序的，或者有序的) 
+// Log(N) 最坏的情况 O(N)
+// AVL, 红黑树登场。    
+
+// 注意搜索树中的key不允许修改的，只能够 修改value的。
 
 int main()
 {
@@ -320,7 +354,6 @@ int main()
 // 中序遍历数据有序
 // 搜索二叉树也叫排序二叉树
 
-    test();
-
+  test2();
     return 0;
 }
