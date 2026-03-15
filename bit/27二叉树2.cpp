@@ -1,4 +1,5 @@
 #include <iostream>
+#include <string>
 
 // 若它的左子树不为空，则左子树上所有节点的值都小于根节点的值
 // 若它的右子树不为空，则右子树上所有节点的值都大于根节点的值
@@ -8,31 +9,32 @@
 // 搜索二叉树也叫做排序二叉树
 
 using namespace std;
-
-template<class k>
+template<class k, class v>
 struct BSTreeNode
 {
-    BSTreeNode(const k& key )
+    BSTreeNode(const k& key, const k& value )
         :left(nullptr)
         ,right(nullptr)
         ,_Key(key)
+        ,_value(value)
     {}
     BSTreeNode* left;
     BSTreeNode* right;
     k _Key;
+    v _value;
 };
 
-template<class k>
+template<class k, class v>
 class BSTree
 {
-    typedef struct BSTreeNode<k> Node;
+    typedef struct BSTreeNode<k, v> Node;
 public:
 
-    bool Insert(const k& key) // 不允许重复数据
+    bool Insert(const k& key, const v& value) // 不允许重复数据
     {
         if(_root == nullptr)
         {
-            _root = new Node(key);
+            _root = new Node(key, value);
             return true;   
         }
         
@@ -60,7 +62,7 @@ public:
         // 这里判断最后的左右
         // 然后连接起来
         // 这里的cur肯定是空的，空的我们才结束循环的。
-        cur = new Node(key); // 新节点的指针呢，需要和父亲链接起来的。
+        cur = new Node(key, value); // 新节点的指针呢，需要和父亲链接起来的。
         if(parent->_Key < key) // 比我大，放右边 
         {
             parent->right = cur;
@@ -79,7 +81,7 @@ public:
         if(root == nullptr)
             return;
         _InOrder(root->left);
-        cout<< root->_Key << " ";
+        cout<< root->_Key << " " << root->_value <<endl;
         _InOrder(root->right);
     }
 
@@ -89,7 +91,7 @@ public:
         cout<<endl;
     }
 
-    bool Find(const k& key)
+    Node*  Find(const k& key)
     {
         Node* cur = _root;
         while(cur != nullptr)
@@ -104,10 +106,10 @@ public:
             }
             else
             {
-                return true;
+                return cur;
             }
         }
-        return false;
+        return nullptr;
     }
 
     // 替换法左子树最大
@@ -285,18 +287,21 @@ private:
 
 void test()
 {       
-    BSTree<int> t;
-    int arr[] = {11,22,55,6,7,4,3,69,24,56,47,89,33};
-    for(auto e : arr)
+  BSTree<string, string> dict;
+  dict.Insert("sort", "排序");
+  dict.Insert("string", "字符串");
+  dict.Insert("tree", "树");
+  dict.Insert("insert", "插入");
+
+  string  str;
+  while(cin>>str)
+  {
+    BSTree<string, string>* ret = dict.Find(str);
+    if(ret != nullptr)
     {
-        t.Insert(e);
+      cout<< ret.->_value<<endl;
     }
-  
-    for(auto e : arr)
-    {
-      t.Erase(e);
-      t.InOrder();
-    }
+  }
 }
 
 
