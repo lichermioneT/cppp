@@ -27,9 +27,16 @@ struct AVLTreeNode
 template<class k, class v>
 class AVLTree 
 {
-typedef AVLTree<k, v> node;
+typedef AVLTreeNode<k, v> Node;
 public:
-  
+   AVLTree()
+        : _root(nullptr)
+    {}
+    ~AVLTree()
+    {
+        delete  _root;
+        _root = nullptr;
+    }
   // 插入三部曲呢。
   // 1.按搜索二叉树插入
   // 2.更新平衡因子
@@ -46,15 +53,15 @@ public:
   {
     if(_root == nullptr)
     {
-      _root = new node(kv);
+      _root = new Node(kv);
       return true;
     }
 
-    node* parent = nullptr;
-    node* cur = _root;
+    Node* parent = nullptr;
+    Node* cur = _root;
     while(cur != nullptr)
     {
-      if(cur->_kv.flist > kv.first)
+      if(cur->_kv.first > kv.first)
       {
         parent = cur;
         cur = cur->_left;
@@ -70,7 +77,7 @@ public:
       }
     }
     
-    cur = new node(kv);  // cur就是新的节点
+    cur = new Node(kv);  // cur就是新的节点
     if(parent->_kv.first < kv.first)
     {
        parent->_right = cur;
@@ -101,7 +108,7 @@ public:
       else if(parent->_bf == -1 || parent->_bf == 1)
       {
         cur = parent;
-        parent = cur->parent;  // 继续向上找了,出现了问题了的。
+        parent = cur->_parent;  // 继续向上找了,出现了问题了的。
       }
       else if(parent->_bf == -2 || parent->_bf == 2)
       {
@@ -114,7 +121,7 @@ public:
         
           // 双旋转-1 2
           // 双旋转 1-2
-          if(parent->bf == 2)
+          if(parent->_bf == 2)
           {
             if(cur->_bf == 1)
             {
@@ -122,7 +129,7 @@ public:
             }
             else if(cur->_bf == -1)
             {
-              //  
+              RotateRL(parent);
             }
           }
 
@@ -132,9 +139,9 @@ public:
             {
               RotateR(parent);
             }
-            else if (cur->_b == 1)
+            else if (cur->_bf == 1)
             {
-              // 
+              RotateLR(parent);
             }
           }
 
@@ -148,11 +155,11 @@ public:
   }
 
 private:
-  void RotateL(node* parent)
+  void RotateL(Node* parent)
   {
-    node* pparent = parent->_parent;
-    node* subR  =  parent->_right;
-    node* subRL = subR->_left;
+    Node* pparent = parent->_parent;
+    Node* subR  =  parent->_right;
+    Node* subRL = subR->_left;
     
     parent->_right = subRL; // 接上去
     if(subRL != nullptr)
@@ -199,11 +206,11 @@ private:
 //   2
 // 3
 private:
-  void RotateR(node* parent)
+  void RotateR(Node* parent)
   {
-    node* pparent = parent->_parent;
-    node* subL = parent->_left;
-    node* subLR = subL->_right;
+    Node* pparent = parent->_parent;
+    Node* subL = parent->_left;
+    Node* subLR = subL->_right;
     
     parent->_left = subLR;
     if(subLR != nullptr)  // 了能是空的。
@@ -233,18 +240,18 @@ private:
   }
 
   // 2 -1
-  void RotateRL(node* parent)
+  void RotateRL(Node* parent)
   {
-    node* subR = parent->_right;
-    node* subRL = subR->_left;
+    Node* subR = parent->_right;
+    Node* subRL = subR->_left;
     int bf  = subRL->_bf; // 记录它的平衡因子
 
     RotateR(parent->_right); // 2 -1 右左双旋
     RotateL(parent);
     if(bf == -1)
     {
-      parent->_bf = subRL->_bf =  0;
-      subR->_bf = 1;
+      parent->_bf = -1;       // ===== 修改9：这里原来逻辑不对 =====
+      subR->_bf = subRL->_bf =  0;
     }
     else if(bf == 1) 
     {
@@ -258,10 +265,10 @@ private:
   }
   
   // -2 1
-  void RotateLR(node* parent)
+  void RotateLR(Node* parent)
   {
-    node* subL = parent->_left;
-    node* subLR = subL->_right;
+    Node* subL = parent->_left;
+    Node* subLR = subL->_right;
     int bf = subLR->_bf ;
 
     RotateL(subL);
@@ -278,16 +285,18 @@ private:
     }
     else 
     {
-      parent->_bf = subLR->_bf = parent->_bf = 0;
+      subL->_bf = subLR->_bf = parent->_bf = 0;
     }
   }
-void _InOrder(node* root)
+
+public:
+void _InOrder(Node* root)
 {
     if (root == nullptr)
         return;
 
     _InOrder(root->_left);
-    cout << root->key.first << ":" << root->value.second << endl;
+     cout << root->_kv.first << ":" << root->_kv.second << endl;
     _InOrder(root->_right);
 }
 
@@ -296,8 +305,38 @@ void InOrder()
     _InOrder(_root);
     cout << endl;
 }
+
+bool isbalance(Node* root)
+{
+  if(root == nullptr)
+  {
+    return true;
+  }
+
+  int leftheight = height(root->_left);
+  int rightheight = height(root->_right);
+  return abs(leftheight - rightheight) < 2
+    && isbalance(root->_left)
+    && isbalance(root->_right);
+}
+
+bool isbalance()
+{
+  return isbalance(_root);
+}
+
+int height(Node* root)
+{
+  if(root == nullptr)
+    return 0;
+  int leftheight = height(root->_left);
+  int rightheight = height(root->_right);
+  return leftheight > rightheight ?  leftheight + 1 :rightheight + 1;
+}
+
+
 private:
-  node* _root = nullptr;
+  Node* _root = nullptr;
 };
 
 /*
@@ -320,13 +359,17 @@ private:
 
 void test()
 {
-  int a[] = {16, 3, 7, 11, 9, 26, 18, 14, 15};
+  /*
+   *int a[] = {16, 3, 7, 11, 9, 26, 18, 14, 15};
+   */
+  int a[] = {4, 2, 6, 1, 3, 5, 15, 7, 16, 14};
   AVLTree<int, int> t;
   for(auto e : a)
   {
     t.insert(make_pair(e, e));
   }
   t.InOrder();
+  cout<< t.isbalance() <<endl;
 }
 
 int main()
