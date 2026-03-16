@@ -1,9 +1,6 @@
 #include <iostream>
 using namespace std;
 
-// 红黑树是近似平衡，高度控制没有AVL树那么严格，增删查改的性能差不多
-// 红黑树的高度可能会高一些的，但是旋转的少，实际中红黑树更加优秀一点的。
-
 // 二叉搜索树近端情况退化成链表了O(n)
 // 解决方案1AVL树: 高度平衡的，左右子树的高度差不超过1。 O(logN)       严格平衡的
 // 解法方案2红黑树：要求最长路径不超过最短路径的2倍。可能是：2*O(logN) 近似平衡
@@ -34,49 +31,52 @@ enum color
   red,
 };
 
-template<class k, class v>
+template<class T>
 struct RBTreeNode
 {
-  RBTreeNode(const pair<k,v>& kv)
+  RBTreeNode(const T& data)
     :_left(nullptr)
     ,_right(nullptr)
     ,_parent(nullptr)
-    ,_kv(kv)
+    ,_data(data)
     ,_col(red)
   {}
-  RBTreeNode<k, v>* _left;
-  RBTreeNode<k, v>* _right;
-  RBTreeNode<k, v>* _parent;
-  pair<k,v> _kv;
+  RBTreeNode<T>* _left;
+  RBTreeNode<T>* _right;
+  RBTreeNode<T>* _parent;
+  T _data;
   color  _col;
 };
 
-template<class k, class v>
+template<class k, class T, class KOfT>
 class RBTree 
 {
-typedef RBTreeNode<k,v> Node;
+typedef RBTreeNode<T> Node;
 public:
-  bool insert(const pair<k, v>& kv) 
+  bool insert(const T& data) 
   {
     if(_root == nullptr)
     {
-      _root = new Node(kv);
+      _root = new Node(data);
       _root->_col = black; // 1.根节点是黑色的。
       return true;
     }
-
+    
+    KOfT koft;
+    
+    
     Node* parent = nullptr;
     Node* cur = _root;
 
 // 1.安装搜索树的规则进行插入进去了
     while(cur != nullptr)
     {
-      if(cur->_kv.first < kv.first)
+      if(koft(cur->_data) < koft(data)) // 数据取出来进行了的
       {
         parent = cur;
         cur = cur->_right;
       }
-      else if(cur->_kv.first > kv.first) 
+      else if(koft(cur->_data) > koft(data)) // 数据取出来进行了的比较的
       {
         parent = cur;
         cur = cur->_left;
@@ -87,8 +87,8 @@ public:
       }
     }
     
-    cur = new  Node(kv);
-    if(parent->_kv.first < cur->_kv.first)
+    cur = new  Node(data);
+    if(koft(parent->_data) < koft(cur->data)) // 取出来数据
     {
       parent->_right = cur;
       cur->_parent = parent;
@@ -345,18 +345,18 @@ bool _IsValidRBTree(Node* pRoot, size_t K, const size_t blackCount)
       && _IsValidRBTree(pRoot->_right, K, blackCount);
 }
 
-// 删除的节点。
 
-  Node* find(const k& key)
+  Node* find(const k& data)
  {
+   KOfT koft;
     Node* cur = _root;
     while(cur != nullptr)
     {
-      if(cur->_kv.first < key)
+      if(koft(cur->_data) < koft(data))
       {
         cur = cur->_right;
       }
-      else if (cur->_kv.first > key)
+      else if (koft(cur->_data) > koft(data))
       {
         cur = cur->_left;
       }
@@ -374,27 +374,74 @@ private:
 };
 
 
+
+template<class k, class v>
+class mymap 
+{
+public:
+  struct MapKeyOfT
+  {
+    const k& operator()(const pair<k,v>& kv)
+    {
+      return kv.first;
+    }
+  };
+  bool insert(const pair<k,v>& kv)
+  {
+    return _t.insert(kv);
+  }
+private:
+  RBTree<k, pair<k,v>, MapKeyOfT> _t;
+};
+
 void test()
 {
-  /*
-   *int a[] = {16, 3, 7, 11, 9, 26, 18, 14, 15};
-   */
-  int b[] = {4, 2, 6, 1, 3, 5, 15, 7, 16, 14};
-
-  RBTree<int, int> t;
-  for(auto e : b)
-  {
-    t.insert(make_pair(e,e));
-  }
-  t.InOrder();
-  cout<< t.IsValidRBTree() <<endl;
+  mymap<int,int> m;
+  m.insert(make_pair(1,1));
+  m.insert(make_pair(3,3));
 }
 
+
+template<class k>
+class mymset
+{
+public:
+  struct SetKeyOfT
+  {
+    const k& operator()(const k& t )
+    {
+      return t;
+    }
+  };
+  
+  bool insert(const k& key)
+  {
+    return _t.insert(key);
+  }
+
+private:
+  RBTree<k, k,SetKeyOfT> _t;
+};
+
+void test1()
+{
+  mymset<int> s;
+  s.insert(3);
+  s.insert(1);
+}
+
+
+
+// 实际上map和set是一颗红黑树实现的。
+// 两个红黑树冗余了
+// 想办法复用
+// _Rb_tree,最基本的红黑树模板
+// 它的核心思想是：将“树节点存储的实际数据（Value）”与“用于排序比较的键值（Key）”解耦。
 
 int main()
 {
   test();
-
+  test1();
   return 0;
 
 }
@@ -449,3 +496,8 @@ int main()
 // 红黑树插入删除节点比AVL树旋转更少，
 // AVL通过更加严格的多次旋转达到了。
 // 所以红黑树实现更容易控制的
+//
+
+
+
+
