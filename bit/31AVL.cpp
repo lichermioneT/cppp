@@ -109,6 +109,11 @@ public:
           // 1.旋转点 前提是他依旧是搜索二叉树
           // 2.旋转成平衡树
           // 3.高度恢复到之前的样子呢。
+          // 单旋转-1-2
+          // 单旋转 1 2
+        
+          // 双旋转-1 2
+          // 双旋转 1-2
           if(parent->bf == 2)
           {
             if(cur->_bf == 1)
@@ -227,6 +232,70 @@ private:
     parent->_bf = subL->_bf = 0;
   }
 
+  // 2 -1
+  void RotateRL(node* parent)
+  {
+    node* subR = parent->_right;
+    node* subRL = subR->_left;
+    int bf  = subRL->_bf; // 记录它的平衡因子
+
+    RotateR(parent->_right); // 2 -1 右左双旋
+    RotateL(parent);
+    if(bf == -1)
+    {
+      parent->_bf = subRL->_bf =  0;
+      subR->_bf = 1;
+    }
+    else if(bf == 1) 
+    {
+      parent->_bf = subRL->_bf =  0;
+      subR->_bf = -1;
+    }
+    else // 只是存在三个及节点情况 
+    {
+      subR->_bf = subRL->_bf = parent->_bf = 0;
+    }
+  }
+  
+  // -2 1
+  void RotateLR(node* parent)
+  {
+    node* subL = parent->_left;
+    node* subLR = subL->_right;
+    int bf = subLR->_bf ;
+
+    RotateL(subL);
+    RotateR(parent);
+    if(bf == 1)
+    {
+      parent->_bf = subLR->_bf = 0;
+      subL->_bf = -1;
+    }
+    else if (bf == -1)
+    {
+      subL->_bf = subLR->_bf = 0;
+      parent->_bf = 1;
+    }
+    else 
+    {
+      parent->_bf = subLR->_bf = parent->_bf = 0;
+    }
+  }
+void _InOrder(node* root)
+{
+    if (root == nullptr)
+        return;
+
+    _InOrder(root->_left);
+    cout << root->key.first << ":" << root->value.second << endl;
+    _InOrder(root->_right);
+}
+
+void InOrder()
+{
+    _InOrder(_root);
+    cout << endl;
+}
 private:
   node* _root = nullptr;
 };
@@ -249,12 +318,23 @@ private:
  *3
  */
 
+void test()
+{
+  int a[] = {16, 3, 7, 11, 9, 26, 18, 14, 15};
+  AVLTree<int, int> t;
+  for(auto e : a)
+  {
+    t.insert(make_pair(e, e));
+  }
+  t.InOrder();
+}
+
 int main()
 {
 
 
 
-
+  test();
 
 
 
