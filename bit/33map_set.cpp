@@ -88,7 +88,7 @@ public:
     }
     
     cur = new  Node(data);
-    if(koft(parent->_data) < koft(cur->data)) // 取出来数据
+    if(koft(parent->_data) < koft(cur->_data)) // 取出来数据
     {
       parent->_right = cur;
       cur->_parent = parent;
@@ -146,7 +146,7 @@ public:
           if(cur == parent->_right)
           {
             RotateL(parent);
-            swap(parent, cur);
+            std::swap(parent, cur);
           }
 
           // 情况2
@@ -173,7 +173,7 @@ public:
               if(cur == parent->_left)
               {
                 RotateR(parent);
-                swap(parent, cur);
+                std::swap(parent, cur);
               }
               RotateL(grandfather);
 
@@ -277,8 +277,9 @@ void _InOrder(Node* root)
     if (root == nullptr)
         return;
 
-    _InOrder(root->_left);
-     cout << root->_kv.first << ":" << root->_kv.second << endl;
+    KOfT koft;
+    cout<< koft(root->_data) << " ";
+
     _InOrder(root->_right);
 }
 
@@ -346,17 +347,17 @@ bool _IsValidRBTree(Node* pRoot, size_t K, const size_t blackCount)
 }
 
 
-  Node* find(const k& data)
+  Node* find(const k& key)
  {
    KOfT koft;
     Node* cur = _root;
     while(cur != nullptr)
     {
-      if(koft(cur->_data) < koft(data))
+      if(koft(cur->_data) < key)
       {
         cur = cur->_right;
       }
-      else if (koft(cur->_data) > koft(data))
+      else if (koft(cur->_data) > key)
       {
         cur = cur->_left;
       }
@@ -390,15 +391,34 @@ public:
   {
     return _t.insert(kv);
   }
+
+    // [新增] 暴露验证接口
+  bool IsValidRBTree()
+  {
+    return _t.IsValidRBTree();
+  }
+
+  // [新增] 暴露中序
+  void InOrder()
+  {
+    _t.InOrder();
+  }
 private:
   RBTree<k, pair<k,v>, MapKeyOfT> _t;
 };
 
 void test()
 {
-  mymap<int,int> m;
-  m.insert(make_pair(1,1));
-  m.insert(make_pair(3,3));
+    mymap<int, int> m;
+  m.insert(make_pair(1, 1));
+  m.insert(make_pair(3, 3));
+  m.insert(make_pair(2, 2));
+  m.insert(make_pair(5, 5));
+  m.insert(make_pair(4, 4));
+
+  // [新增] 验证
+  cout << "mymap 是否为红黑树: " << m.IsValidRBTree() << endl;
+  m.InOrder();
 }
 
 
@@ -418,16 +438,34 @@ public:
   {
     return _t.insert(key);
   }
+  
+    // [新增] 暴露验证接口
+  bool IsValidRBTree()
+  {
+    return _t.IsValidRBTree();
+  }
 
+  // [新增] 暴露中序
+  void InOrder()
+  {
+    _t.InOrder();
+  }
 private:
   RBTree<k, k,SetKeyOfT> _t;
 };
 
 void test1()
 {
-  mymset<int> s;
+    mymset<int> s;
   s.insert(3);
   s.insert(1);
+  s.insert(5);
+  s.insert(2);
+  s.insert(4);
+
+  // [新增] 验证
+  cout << "mymset 是否为红黑树: " << s.IsValidRBTree() << endl;
+  s.InOrder();
 }
 
 
