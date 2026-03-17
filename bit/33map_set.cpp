@@ -48,11 +48,91 @@ struct RBTreeNode
   color  _col;
 };
 
+template<class T>
+struct __TreeIterator
+{
+typedef RBTreeNode<T> Node;
+typedef __TreeIterator<T> self;
+  __TreeIterator<T>(Node* node)
+    :_node(node)
+  {
+
+  }
+Node* _node;
+  
+    T& operator*()
+    {
+      return _node->_data;
+    }
+
+    T* operator->()
+    {
+      return &_node->_data;
+    }
+    
+    self& operator++() // 前置++
+    {
+      // 右边为空，就是访问子树访问完成了的。
+      if(_node->_right) // 右子树不是空的，则中序就是右子树的最小值的
+      {
+        Node* subLeft = _node->_right;
+        while(subLeft->_left != nullptr)
+        {
+          subLeft = subLeft->_left;
+        }
+        _node = subLeft;
+      }
+      else // 右为空，子树访问完成了的，下一个节点去祖先里面找了。 
+      {    // 去找父亲的父亲(祖先)
+          Node* cur = _node;
+          Node* parent = cur->_parent;
+          while(parent && cur == parent->_right)
+          {
+            cur = cur->_parent;
+            parent = parent->_parent;
+          }
+          _node = parent;
+      }
+      return *this;     
+    }
+
+    self& operator--() // 前置--
+    {
+      
+      return *this;
+    }
+
+    bool operator!=(const self& s)
+    {
+      return _node != s._node; // s->_node
+    }
+
+};
+
+
 template<class k, class T, class KOfT>
 class RBTree 
 {
 typedef RBTreeNode<T> Node;
 public:
+    typedef __TreeIterator<T> iterator;  
+      
+    iterator begin()
+    {
+      Node* cur = _root;
+      while(cur != nullptr && cur->_left != nullptr)
+      {
+        cur = cur->_left;
+      }
+
+      return iterator(cur);
+    }
+
+    iterator end()
+    {
+      return nullptr;
+    }
+
   bool insert(const T& data) 
   {
     if(_root == nullptr)
@@ -276,7 +356,7 @@ void _InOrder(Node* root)
 {
     if (root == nullptr)
         return;
-
+    _InOrder(root->_left);
     KOfT koft;
     cout<< koft(root->_data) << " ";
 
@@ -382,11 +462,22 @@ class mymap
 public:
   struct MapKeyOfT
   {
-    const k& operator()(const pair<k,v>& kv)
+    const k& operator()(const pair<k,v>& kv) //仿函数
     {
       return kv.first;
     }
   };
+  typedef typename RBTree<k, pair<k,v>, MapKeyOfT>::iterator iterator;
+
+  iterator begin()
+  {
+    return _t.begin();
+  }
+
+  iterator  end()
+  {
+    return _t.end();
+  }
   bool insert(const pair<k,v>& kv)
   {
     return _t.insert(kv);
@@ -415,10 +506,19 @@ void test()
   m.insert(make_pair(2, 2));
   m.insert(make_pair(5, 5));
   m.insert(make_pair(4, 4));
+  m.insert(make_pair(6, 4));
+  m.insert(make_pair(99, 4));
+  m.insert(make_pair(43, 4));
+  m.insert(make_pair(77, 4));
+  m.insert(make_pair(33, 4));
 
-  // [新增] 验证
-  cout << "mymap 是否为红黑树: " << m.IsValidRBTree() << endl;
-  m.InOrder();
+  mymap<int,int>::iterator it = m.begin();
+  while(it != m.end())
+  {
+    cout<< it->first << ":" << it->second <<endl;
+    ++it;
+  }
+  cout<<endl;
 }
 
 
@@ -426,6 +526,7 @@ template<class k>
 class mymset
 {
 public:
+
   struct SetKeyOfT
   {
     const k& operator()(const k& t )
@@ -433,7 +534,20 @@ public:
       return t;
     }
   };
-  
+
+public:
+  typedef typename RBTree<k, k, SetKeyOfT>::iterator iterator;
+
+  iterator begin()
+  {
+    return _t.begin();
+  }
+
+  iterator  end()
+  {
+    return _t.end();
+  }
+
   bool insert(const k& key)
   {
     return _t.insert(key);
@@ -464,11 +578,19 @@ void test1()
   s.insert(4);
 
   // [新增] 验证
-  cout << "mymset 是否为红黑树: " << s.IsValidRBTree() << endl;
-  s.InOrder();
+  /*
+   *cout << "mymset 是否为红黑树: " << s.IsValidRBTree() << endl;
+   *s.InOrder();
+   */
+
+  mymset<int>::iterator it =  s.begin();
+  while(it != s.end())
+  {
+      cout<< *it << " ";
+      ++it;
+  }
+  cout<<endl;
 }
-
-
 
 // 实际上map和set是一颗红黑树实现的。
 // 两个红黑树冗余了
