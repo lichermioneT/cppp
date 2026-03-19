@@ -1,4 +1,5 @@
 #include <iostream>
+#include <utility>
 using namespace std;
 
 // 哈希(散列)：将数据的存储根存储的位置使用哈希函数建立出映射关系，方便我们进行高效查找。
@@ -32,6 +33,7 @@ template<class T, class Ref, class Ptr>
 struct __TreeIterator
 {
 typedef RBTreeNode<T> Node;
+typedef __TreeIterator<T
   public:
 typedef __TreeIterator<T, T&, T*> iterator;
 typedef __TreeIterator<T, const T&, const T*> const_iterator;
