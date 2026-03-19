@@ -25,16 +25,17 @@ enum State
 template<class  T>
 struct hashData
 {
-  T _data;
-  State _state;
+  T _data;   // 需要存储的数据
+  State _state; // 数据的状态呢
 };
 
 template<class K, class T, class KeyOfT>
 class hashtable 
 {
-  typedef hashData<T> hasData;
+  typedef hashData<T> hashData;
 public:
-  bool insert(const  T& d )
+  // “探测到 EMPTY，说明后面不可能再有这个元素了，因为这里从来没放过数据。”
+  bool insert(const T& d )
   {
     // 负载因子，表中的数据/表的大小。衡量哈希表满的程度。
     // 表越满，效率越低。
@@ -45,6 +46,7 @@ public:
     // 负载因子是空间换时间的策略
     
 
+    KeyOfT keyOft;
 // 数据扩容，导致除数变化了的。
 // 增容三部曲
 // 1.空间开一个2倍
@@ -52,20 +54,40 @@ public:
 // 3.释放旧表的空间
     if(_num*10 / _table.size() >= 7)
     {
-        
+      // 1.开数据
+      // 2.重新映射
+      // 3.释放旧表
+      vector<hashData> newTable;
+      newTable.resize(_table.size());
+      for(size_t i = 0; i < _table.size(); ++i)
+      {
+        if(_table[i]._state == EXITS)
+        {
+
+        size_t index = keyOft(_table[i]._data) % newTable.size();
+        while(newTable[index]._state == EXITS)
+        {
+          ++index;
+          if(index == _table.size())
+          {
+            index = 0;
+          }
+        }
+        newTable[index] = _table[i];
+      }
+      }
+      _table.swap(newTable);
     }
 
-    KeyOfT keyOft;
-    size_t index = keyOft(d) % _table.size();
-    
-    if(keyOft(_table[index]._daa) == keyOft(d))
-    {
-      return   false;
-    }
-
-    ++index;
+    size_t index = keyOft(d) % _table.size(); // 算数据应该在表中的位置。
     while(_table[index]._state == EXITS)
     {
+      if(keyOft(_table[index]._data) == keyOft(d))
+      {
+        return   false;
+      }
+
+      ++index;
       if(index == _table.size())
       {
         index = 0;
@@ -78,22 +100,25 @@ public:
     return true;
   }
 
-  hasData* find(const K& key)
+  hashData* find(const K& key)
   {
     KeyOfT koft;
     size_t index = key % _table.size();
-    while(index != EMPTY)
+    while(_table[index]._state != EMPTY)
     {
-      if(_table[index]._state == EXITS)
+      if(_table[index]._data == key)
       {
-        return &_table[index];
+        if(_table[index]._state == EXITS)
+        {
+          return &_table[index];
+        }
+        else if(_table[index]._state == DELETE) 
+        {
+          return nullptr;
+        }
       }
-      else if(_table[index]._state == DELETE)
-      {
-        return nullptr;
-      }
+      
       ++index;
-
       if(index == _table.size())
       {
           index = 0;
@@ -104,8 +129,8 @@ public:
 
   bool erase(const K& key)
   {
-    hasData* ret = find(key);
-    if(ret)
+    hashData* ret = find(key);
+    if(ret != nullptr)
     {
       ret->_state = DELETE;
       return true;
@@ -118,7 +143,7 @@ public:
 
 private:
   vector<K> _table; // 映射的表
-  size_t _num;    // 存了几个数据的 
+  size_t _num = 0;    // 存了几个数据的 
 };
 
 void test2()
