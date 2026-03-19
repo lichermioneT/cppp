@@ -5,6 +5,16 @@
 #include <unordered_set>
 using namespace std;
 
+template<class K>
+struct  SetKeyOfT
+{
+  // functor(function object)
+  const K& operator()(const K& key)
+  {
+    return key;
+  }
+};
+
 enum State
 {
   EMPTY,
@@ -13,7 +23,7 @@ enum State
 };
 
 template<class  T>
-struct hasData
+struct hashData
 {
   T _data;
   State _state;
@@ -22,6 +32,7 @@ struct hasData
 template<class K, class T, class KeyOfT>
 class hashtable 
 {
+  typedef hashData<T> hasData;
 public:
   bool insert(const  T& d )
   {
@@ -105,33 +116,20 @@ public:
     }
   }
 
-
-
-
-
 private:
   vector<K> _table; // 映射的表
   size_t _num;    // 存了几个数据的 
 };
 
-
-
-
-// hash是一种映射关系的数据
-// 直接定制法
-// a-97=0
-// a-98=1
-// .....
-
-// 除留余数法
-// 除留余数法，不再是给每个值映射一个位置，在限定的大小空间中将我的值映射进去。
-// index = key % capacity。
-// 问题就是：不同的值的余数可能一样的，映射到相同的位置，导致哈希冲突，导致效率低下的。
-// 如何解决呢？
-// 1.闭散列--开放定值法(按规则再给你找个位置)
-//  a.线性探测，挨着挨着往后找
-//  b.二次探测，安装平方一直找
-// 2.开散列--拉链法(哈希桶) 重点。
+void test2()
+{
+  hashtable<int, int, SetKeyOfT<int>> ht;
+  ht.insert(1);
+  ht.insert(3);
+  ht.insert(5);
+  ht.insert(7);
+  ht.insert(9);
+}
 
 int main()
 {
@@ -210,3 +208,21 @@ void test_unorder_map_set()
 // 1.冲突了去找下一个空位置。
 // 冲突越多，效率越低 。
 // 2.二叉探测。
+
+
+// hash是一种映射关系的数据
+// 直接定制法
+// a-97=0
+// a-98=1
+// .....
+
+// 除留余数法
+// 除留余数法，不再是给每个值映射一个位置，在限定的大小空间中将我的值映射进去。
+// index = key % capacity。
+// 问题就是：不同的值的余数可能一样的，映射到相同的位置，导致哈希冲突，导致效率低下的。
+// 如何解决呢？
+// 1.闭散列--开放定值法(按规则再给你找个位置)
+//  a.线性探测，挨着挨着往后找
+//  b.二次探测，安装平方一直找
+// 2.开散列--拉链法(哈希桶) 重点。
+
